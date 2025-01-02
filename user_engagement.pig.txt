@@ -1,0 +1,14 @@
+-- Load the data
+movies_data = LOAD '/final_project/ratings.csv'  USING PigStorage(',') AS (userId:chararray, movieId:chararray, rating:float, timestamp:long);
+
+-- Group data by userId and emit (userId, 1)
+grouped_data = GROUP movies_data BY userId;
+
+-- Aggregate the count of ratings for each userId
+user_rating_count = FOREACH grouped_data GENERATE group AS userId, COUNT(movies_data) AS rating_count;
+
+-- Sort the users by rating_count in descending order
+sorted_users = ORDER user_rating_count BY rating_count DESC;
+
+-- Store or display the result
+STORE sorted_users INTO '/user/hdoop/user_engagement'  USING PigStorage(',');
